@@ -1,0 +1,37 @@
+As a Cyber OSINT Analyst, I've extracted the key intelligence fields from the raw WHOIS lookup data for the domain 'google.com':
+
+**1. Domain Registrar & Owner Organization:**
+
+* Domain Registrar: MarkMonitor Inc.
+* Registry Domain ID: 2138514_DOMAIN_COM-VRSN
+* Registrar IANA ID: 292
+
+The registrar is MarkMonitor Inc., a well-known domain name registrar and brand protection company.
+
+**2. Important Dates (Creation, Expiry, Last Updated):**
+
+* Creation Date: 1997-09-15T04:00:00Z (Google.com was registered in September 1997)
+* Registry Expiry Date: 2028-09-14T04:00:00Z (The domain registration will expire in September 2028)
+* Last Updated: 2019-09-09T15:39:04Z (The WHOIS record was last updated on September 9, 2019)
+
+**3. Name Servers (NS Records):**
+
+* Name Server: NS1.GOOGLE.COM
+* Name Server: NS2.GOOGLE.COM
+* Name Server: NS3.GOOGLE.COM
+* Name Server: NS4.GOOGLE.COM
+
+Google.com uses its own name servers for DNS resolution.
+
+**4. Operational Security Insights:**
+
+* The owner data is not fully redacted, but it appears that the registrant organization is not publicly disclosed.
+* There are no obvious anomalies in the WHOIS record.
+* The domain status indicates that client and server transfer prohibition status are active, which suggests that Google.com may have implemented measures to prevent unauthorized transfers or updates.
+
+Additional observations:
+
+* The DNSSEC status is listed as "unsigned", indicating that Google.com does not currently support DNSSEC (Domain Name System Security Extensions).
+* The WHOIS record includes several notices regarding the use of electronic processes and automated queries, which are intended to prevent abuse and ensure compliance with ICANN's policies.
+
+Overall, this WHOIS lookup data provides basic information about the domain registration and name servers for Google.com.

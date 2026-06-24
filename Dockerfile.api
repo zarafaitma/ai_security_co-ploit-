@@ -1,0 +1,49 @@
+# Dockerfile.api  (NEW — Phase 6, Part A)
+# --------------------------------------------------------------------------
+# Container for the FastAPI backend (backend/api.py). Separate image from
+# Dockerfile.streamlit -- the two services are independently built/scaled,
+# matching how they already run as two independent processes outside
+# Docker (this file doesn't change that, it just packages it).
+#
+# nmap/whois/dnsutils/curl are installed because recon_tools.py (used by
+# backend/api.py's /scans and /chat routes) shells out to them via
+# subprocess -- without these binaries present, every scan would fail
+# inside the container even though the Python code is fine.
+# --------------------------------------------------------------------------
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# System packages needed by recon_tools.py's subprocess calls (nmap,
+# whois, dig, curl). build-essential + libpq-dev only matter if you swap
+# psycopg2-binary for plain psycopg2 in requirements.txt -- left out here
+# since the default requirements.txt uses the binary wheel.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    nmap \
+    whois \
+    dnsutils \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Only the files backend/api.py actually needs -- not app.py (Streamlit
+# has its own Dockerfile.streamlit) and not the test_*.py files.
+COPY database.py recon_tools.py job_queue.py queue_factory.py redis_queue.py ./
+COPY backend/ ./backend/
+
+# Rotating log file lives here inside the container; mount a volume onto
+# this path in docker-compose.yml if you want logs to survive a
+# container recreate (already wired up that way, see docker-compose.yml).
+RUN mkdir -p /app/logs
+
+EXPOSE 8000
+
+# Basic container-level healthcheck hitting the new Phase 6 endpoint --
+# docker-compose.yml also defines this same check so `docker compose ps`
+# shows healthy/unhealthy without needing nginx in front of it.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:8000/api/v1/health || exit 1
+
+CMD ["uvicorn", "backend.api:app", "--host", "0.0.0.0", "--port", "8000"]

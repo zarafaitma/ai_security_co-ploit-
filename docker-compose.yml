@@ -1,0 +1,149 @@
+# docker-compose.yml  (NEW — Phase 6, Part A)
+# --------------------------------------------------------------------------
+# Brings up the full stack: PostgreSQL, Redis, the FastAPI backend, the
+# Streamlit frontend, and nginx as the single public entry point.
+#
+# Local development is NOT broken by any of this -- nothing here modifies
+# app.py/database.py/job_queue.py/backend/. You can still just run
+# `streamlit run app.py` or `uvicorn backend.api:app --reload` directly on
+# your machine with plain SQLite and no Redis at all, exactly as before;
+# this file is an alternative way to run everything, not a replacement.
+#
+# Quick start:
+#   cp .env.example .env        # then edit secrets/passwords in .env
+#   docker compose up --build
+#   -> https://localhost (or http://localhost if you haven't set up TLS
+#      yet -- see HTTPS_SETUP.md and the commented HTTPS block in nginx.conf)
+#
+# Only nginx publishes ports to the host. postgres/redis/api/streamlit are
+# reachable from each other over the internal `app-network` by service
+# name (e.g. PG_HOST=postgres, REDIS_URL=redis://redis:6379/0) but are not
+# exposed to the host directly -- uncomment their `ports:` blocks below if
+# you want to hit them straight from your machine for local debugging.
+# --------------------------------------------------------------------------
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ai-security-copilot-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${PG_DATABASE:-security_copilot}
+      POSTGRES_USER: ${PG_USER:-postgres}
+      POSTGRES_PASSWORD: ${PG_PASSWORD:-changeme_set_in_dotenv}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    # ports:
+    #   - "5432:5432"   # uncomment only for local debugging with a DB client
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PG_USER:-postgres} -d ${PG_DATABASE:-security_copilot}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: ai-security-copilot-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    networks:
+      - app-network
+    # ports:
+    #   - "6379:6379"   # uncomment only for local debugging with redis-cli
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: ai-security-copilot-api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      # Container-network overrides -- inside Docker, services reach each
+      # other by service name, not localhost. Everything else (JWT_*,
+      # RATE_LIMIT_*, LOG_*, etc.) comes from .env via env_file above.
+      DB_BACKEND: postgres
+      PG_HOST: postgres
+      QUEUE_BACKEND: ${QUEUE_BACKEND:-redis}
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - api_logs:/app/logs
+    networks:
+      - app-network
+    # ports:
+    #   - "8000:8000"   # uncomment only for local debugging without nginx
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 15s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+
+  streamlit:
+    build:
+      context: .
+      dockerfile: Dockerfile.streamlit
+    container_name: ai-security-copilot-streamlit
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DB_BACKEND: postgres
+      PG_HOST: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app-network
+    # ports:
+    #   - "8501:8501"   # uncomment only for local debugging without nginx
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 15s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: ai-security-copilot-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      # Mount your real certificate directory here once you have one --
+      # see HTTPS_SETUP.md. Left as a relative ./certs so `docker compose
+      # up` doesn't fail if it doesn't exist yet (nginx.conf's HTTPS
+      # server block is commented out until you're ready for it).
+      - ./certs:/etc/nginx/certs:ro
+    depends_on:
+      - api
+      - streamlit
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  api_logs:

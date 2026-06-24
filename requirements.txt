@@ -1,0 +1,22 @@
+# Core app (required — unchanged from before Phase 1/2)
+streamlit
+langchain-ollama
+pandas
+plotly
+
+# Phase 2 — only needed if DB_BACKEND=postgres is actually set.
+# The app runs fine on plain SQLite with neither of these installed.
+psycopg2-binary
+python-dotenv
+
+# Phase 3 — the separate FastAPI backend (backend/api.py). Not required
+# to run the Streamlit app itself; only needed if you also run the API.
+fastapi
+uvicorn[standard]
+
+# Phase 5 — JWT auth for the FastAPI backend only.
+pyjwt
+
+# Phase 6 — only needed if QUEUE_BACKEND=redis is actually set. The app
+# runs fine with the default in-process queue (Phase 4) without this.
+redis

@@ -1,0 +1,40 @@
+# .dockerignore  (NEW — Phase 6, Part A)
+# Keeps build context small and prevents local secrets/dev artifacts from
+# ever being baked into an image layer.
+
+# Version control
+.git
+.gitignore
+
+# Local secrets -- real values are injected at container runtime via
+# docker-compose.yml's env_file/environment, never copied into the image.
+.env
+
+# Local dev databases / logs -- containers get their own via volumes
+# (see docker-compose.yml), these are just this machine's local files.
+*.db
+*.sqlite
+*.sqlite3
+logs/
+
+# Python runtime artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+*.venv
+venv/
+
+# Test files -- not needed inside the production image
+test_*.py
+
+# Editor/OS noise
+.vscode/
+.idea/
+.DS_Store
+
+# Docker-related files themselves don't need to be in the build context
+docker-compose.yml
+docker-compose.*.yml

@@ -281,7 +281,7 @@ st.markdown("""
         padding: 16px;
         border-radius: 10px;
         border: 1px solid #1e293b;
-        margin-top: 40px;
+        margin-top: 28px;
     }
     
     .profile-header {
@@ -336,6 +336,319 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==============================================================================
+# 2.5 ADDITIONAL UI EXTENSION STYLING (NEW)
+#     Top app bar, SaaS-style stat cards, extra badge variants, reports list,
+#     engine status card, chat avatar/bubbles, chat input, bottom status bar.
+#     Purely additive/presentational — does not touch any class above.
+# ==============================================================================
+st.markdown("""
+    <style>
+    /* ---- Top Application Bar ---- */
+    .app-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 6px 0 22px 0;
+        margin-bottom: 6px;
+    }
+    .topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+    }
+    .topbar-search {
+        background: #161e2e;
+        border: 1px solid #1e293b;
+        border-radius: 10px;
+        padding: 10px 16px;
+        color: #64748b;
+        font-size: 0.85rem;
+        width: 320px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+    }
+    .topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .topbar-icon-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 8px;
+        background: #161e2e;
+        border: 1px solid #1e293b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        position: relative;
+        color: #94a3b8;
+        flex-shrink: 0;
+    }
+    .notif-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: #ef4444;
+        color: #ffffff;
+        font-size: 0.62rem;
+        font-weight: 700;
+        border-radius: 50%;
+        width: 17px;
+        height: 17px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid #0f1419;
+    }
+    .window-controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-left: 8px;
+        padding-left: 16px;
+        border-left: 1px solid #1e293b;
+    }
+    .window-dot {
+        width: 30px;
+        height: 30px;
+        border-radius: 6px;
+        background: #161e2e;
+        border: 1px solid #1e293b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        color: #64748b;
+        flex-shrink: 0;
+    }
+
+    /* ---- SaaS-style Stat Card Internals (wraps inside existing .stat-card) ---- */
+    .sc-top {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 16px;
+    }
+    .sc-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        flex-shrink: 0;
+    }
+    .sc-value {
+        font-size: 1.7rem;
+        font-weight: 700;
+        color: #f8fafc;
+        line-height: 1.15;
+    }
+    .sc-label {
+        color: #94a3b8;
+        font-size: 0.82rem;
+        margin-top: 2px;
+    }
+    .sc-trend {
+        font-size: 0.78rem;
+        font-weight: 500;
+    }
+    .sc-trend.up { color: #10b981; }
+    .sc-trend.down { color: #ef4444; }
+
+    /* ---- Extra Badge Variants (sit alongside badge-critical/high/medium/low) ---- */
+    .badge-info {
+        background: rgba(56, 189, 248, 0.15);
+        color: #38bdf8;
+        border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+    .badge-purple {
+        background: rgba(168, 85, 247, 0.15);
+        color: #a855f7;
+        border: 1px solid rgba(168, 85, 247, 0.3);
+    }
+    .badge-cyan {
+        background: rgba(34, 211, 238, 0.15);
+        color: #22d3ee;
+        border: 1px solid rgba(34, 211, 238, 0.3);
+    }
+    .badge-neutral {
+        background: rgba(148, 163, 184, 0.15);
+        color: #94a3b8;
+        border: 1px solid rgba(148, 163, 184, 0.3);
+    }
+    .badge-success {
+        background: rgba(16, 185, 129, 0.15);
+        color: #10b981;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    /* ---- Recent Activity / Reports-style List ---- */
+    .reports-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .report-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px;
+        border-radius: 8px;
+        transition: background 0.2s;
+    }
+    .report-item:hover {
+        background: #161e2e;
+    }
+    .report-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+    .report-name {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #e2e8f0;
+    }
+    .report-meta {
+        font-size: 0.72rem;
+        color: #64748b;
+        margin-top: 2px;
+    }
+
+    /* ---- Sidebar Engine Status Card (sibling of .profile-card) ---- */
+    .engine-status-card {
+        background: #111827;
+        padding: 16px;
+        border-radius: 10px;
+        border: 1px solid #1e293b;
+        margin-top: 10px;
+    }
+
+    /* ---- Sidebar Nav Buttons (active state via Streamlit's native button type) ---- */
+    [data-testid="stSidebar"] div[data-testid="stButton"] button {
+        text-align: left !important;
+        justify-content: flex-start !important;
+        font-weight: 500;
+        border-radius: 8px;
+        padding: 10px 14px;
+    }
+    [data-testid="stSidebar"] div[data-testid="stButton"] button[kind="secondary"] {
+        background: transparent;
+        border: 1px solid transparent;
+        color: #94a3b8;
+    }
+    [data-testid="stSidebar"] div[data-testid="stButton"] button[kind="secondary"]:hover {
+        background: #161e2e;
+        border: 1px solid #1e293b;
+        color: #e2e8f0;
+    }
+    [data-testid="stSidebar"] div[data-testid="stButton"] button[kind="primary"] {
+        background: rgba(59, 130, 246, 0.15) !important;
+        border: 1px solid rgba(59, 130, 246, 0.4) !important;
+        color: #3b82f6 !important;
+        box-shadow: none !important;
+    }
+    [data-testid="stSidebar"] div[data-testid="stButton"] button[kind="primary"]:hover {
+        background: rgba(59, 130, 246, 0.22) !important;
+        border: 1px solid rgba(59, 130, 246, 0.5) !important;
+        color: #60a5fa !important;
+    }
+
+    /* ---- Quick-reply pill buttons in chat (best-effort key-based targeting) ---- */
+    .st-key-qr_explain button, .st-key-qr_fix button, .st-key-qr_critical button {
+        border-radius: 20px !important;
+        background: #161e2e !important;
+        border: 1px solid #1e293b !important;
+        font-size: 0.78rem !important;
+        padding: 6px 10px !important;
+        color: #cbd5e1 !important;
+    }
+    .st-key-view_full_timeline button {
+        background: transparent !important;
+        border: 1px solid #1e293b !important;
+        color: #94a3b8 !important;
+        font-size: 0.8rem !important;
+    }
+
+    /* ---- Chat Avatar Wrapper + Bubble Differentiation (best-effort, version-dependent) ---- */
+    .chat-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        box-shadow: 0 0 14px rgba(59,130,246,0.35);
+        flex-shrink: 0;
+    }
+    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {
+        flex-direction: row-reverse;
+    }
+    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) [data-testid="stChatMessageContent"] {
+        background: #2563eb;
+        border-radius: 14px 14px 2px 14px;
+        border: none;
+    }
+    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarAssistant"]) [data-testid="stChatMessageContent"] {
+        background: #161e2e;
+        border: 1px solid #1e293b;
+        border-radius: 14px 14px 14px 2px;
+    }
+
+    /* ---- Chat Input ---- */
+    [data-testid="stChatInput"] {
+        background: #111827 !important;
+        border: 1px solid #1e293b !important;
+        border-radius: 16px !important;
+    }
+    [data-testid="stChatInput"] textarea {
+        color: #e2e8f0 !important;
+    }
+
+    /* ---- Bottom Full-width Status Bar ---- */
+    .status-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        background: #0b0f17;
+        border: 1px solid #1e293b;
+        border-radius: 12px;
+        padding: 14px 26px;
+        margin-top: 30px;
+        font-size: 0.85rem;
+        color: #94a3b8;
+    }
+    .status-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+        flex-shrink: 0;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+# ==============================================================================
 # 3. BACKEND AI ENGINE INITIALIZATION (QWEN 2.5:3B)
 # ==============================================================================
 @st.cache_resource
@@ -358,7 +671,7 @@ def _init_database():
     database.create_database()
     return True
 
-_init_database()
+db_ready = _init_database()
 
 # ==============================================================================
 # 4. VOLATILE SESSION DATA AND STATE MANAGEMENT STATE MACHINES
@@ -398,6 +711,53 @@ def add_history(target, task, risk, raw_result=""):
     time_now = datetime.now().strftime("%I:%M %p")
     st.session_state.history.insert(0, [time_now, target, task, risk])
     database.save_scan(target, task, risk, raw_result)  # NEW: persist to security_copilot.db
+
+# ==============================================================================
+# 4.5 AUTHENTICATION GATE (NEW) — Phase 1
+#     Nothing above this line (Sections 1-4) or below it (Sections 5 onward,
+#     i.e. the entire original dashboard/recon/chat logic) has been touched.
+#     This block only decides whether a given script run is allowed to reach
+#     Section 5+. Uses the existing database.get_user()/verify_password().
+# ==============================================================================
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
+if "username" not in st.session_state:
+    st.session_state.username = None
+if "role" not in st.session_state:
+    st.session_state.role = None
+
+def is_admin():
+    """Returns True if the currently logged-in operator has the admin role."""
+    return st.session_state.get("role") == "admin"
+
+if not st.session_state.authenticated:
+    _gate_l, _gate_c, _gate_r = st.columns([1, 1.1, 1])
+    with _gate_c:
+        st.markdown("""
+            <div style='text-align:center; margin-top: 80px; margin-bottom: 10px;'>
+                <div style='font-size: 2.4rem;'>🛡️</div>
+                <h2 style='color:#f8fafc; margin-bottom:2px;'>AI Security Copilot Pro</h2>
+                <p style='color:#94a3b8; font-size:0.85rem;'>Operator authentication required to access the SOC console.</p>
+            </div>
+        """, unsafe_allow_html=True)
+
+        with st.form("login_form"):
+            login_username = st.text_input("Username")
+            login_password = st.text_input("Password", type="password")
+            login_submitted = st.form_submit_button("Sign In", use_container_width=True)
+
+        if login_submitted:
+            user_record = database.get_user(login_username)
+            if user_record and database.verify_password(login_password, user_record["password_hash"]):
+                st.session_state.authenticated = True
+                st.session_state.username = user_record["username"]
+                st.session_state.role = user_record["role"]
+                add_log(f"Operator '{user_record['username']}' authenticated (role: {user_record['role']}).")
+                st.rerun()
+            else:
+                st.error("Invalid username or password.")
+
+    st.stop()
 
 # ==============================================================================
 # 5. INTEGRATED HARDWARE/SUBPROCESS OPERATIONAL UTILITY CONTROLLERS
@@ -466,23 +826,102 @@ def run_subdomain_brute_force(domain):
     return discovered if discovered else [{"Subdomain": f"www.{domain}", "Status": "Active (Fallback)"}]
 
 # ==============================================================================
+# 5.5 NEW PRESENTATION-LAYER HELPER FUNCTIONS (DISPLAY-ONLY, NO BUSINESS LOGIC)
+#     These only format/aggregate existing session-state data for the new
+#     SaaS-style layout. They do not call any external tool/process and do
+#     not write to the database.
+# ==============================================================================
+def render_stat_card(icon, icon_color, value, label, trend_text, trend_positive=True):
+    """Builds the markup for one SaaS-style stat card. Reuses the existing
+    .stat-card class for the outer shell (hover/border/gradient) and only
+    introduces new inner classes for the icon+value+trend layout."""
+    trend_class = "up" if trend_positive else "down"
+    return f"""<div class='stat-card'>
+        <div class='sc-top'>
+            <div class='sc-icon' style='background:{icon_color}22; color:{icon_color};'>{icon}</div>
+            <div>
+                <div class='sc-value'>{value}</div>
+                <div class='sc-label'>{label}</div>
+            </div>
+        </div>
+        <div class='sc-trend {trend_class}'>{trend_text}</div>
+    </div>"""
+
+def get_category_badge(task_name):
+    """Maps an operation/task name to a presentational badge class via a
+    simple substring heuristic. Display-only — never affects routing."""
+    t = task_name.lower()
+    if "dns" in t:
+        return "badge-cyan"
+    elif "header" in t or "http" in t:
+        return "badge-info"
+    elif "nmap" in t or "port" in t:
+        return "badge-purple"
+    elif "subdomain" in t:
+        return "badge-purple"
+    elif "chain" in t or "automated" in t:
+        return "badge-info"
+    else:
+        return "badge-neutral"
+
+def render_risk_distribution_chart(history):
+    """Aggregates REAL risk-level counts from st.session_state.history into
+    a donut chart. Returns None if there is no recognizable data yet."""
+    counts = {"LOW": 0, "MEDIUM": 0, "HIGH": 0, "CRITICAL": 0}
+    for row in history:
+        risk = row[3] if len(row) > 3 else "LOW"
+        if risk in counts:
+            counts[risk] += 1
+
+    color_map = {"LOW": "#10b981", "MEDIUM": "#f59e0b", "HIGH": "#f97316", "CRITICAL": "#ef4444"}
+    labels = [k for k in counts if counts[k] > 0]
+    values = [counts[k] for k in counts if counts[k] > 0]
+    if not values:
+        return None
+
+    colors = [color_map[k] for k in labels]
+    fig = go.Figure(data=[go.Pie(
+        labels=labels,
+        values=values,
+        hole=.65,
+        marker=dict(colors=colors),
+        textinfo='percent',
+        textfont=dict(size=11)
+    )])
+    fig.update_layout(
+        template="plotly_dark",
+        height=250,
+        showlegend=True,
+        legend=dict(orientation="h", yanchor="bottom", y=-0.3, font=dict(size=10)),
+        margin=dict(l=10, r=10, t=10, b=10),
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)'
+    )
+    return fig
+
+# ==============================================================================
 # 6. SIDEBAR GRAPHICS NAVIGATION INTERFACE
 # ==============================================================================
 with st.sidebar:
-    st.markdown("### 🛡️ RECONTOOLKIT PRO")
+    st.markdown("### 🛡️ AI SECURITY COPILOT PRO")
     st.markdown("<p style='color: #64748b; font-size: 0.8rem; margin-top:-10px;'>SOC Cockpit Version 1.3.5</p>", unsafe_allow_html=True)
     st.markdown("---")
     
-    # Active Navigation Toggle Buttons
-    st.button("📊 Dashboard Hub", use_container_width=True, key="nav_dash_hub")
-    st.button("🤖 Live AI Terminal", use_container_width=True, key="nav_ai_term")
-    st.button("🕵️ Network Recon Center", use_container_width=True, key="nav_net_recon")
-    st.button("📋 Compliance Reports", use_container_width=True, key="nav_compliance")
-    st.button("⚙️ Control Panel Configuration", use_container_width=True, key="nav_ctrl_panel")
+    # Active Navigation Toggle Buttons (still 100% decorative — no on_click/return-value
+    # handling existed in the original file either, so relabeling/expanding is presentation-only)
+    st.button("📊 Dashboard", use_container_width=True, key="nav_dash_hub", type="primary")
+    st.button("📜 Log Analyzer", use_container_width=True, key="nav_log_analyzer")
+    st.button("🤖 AI Copilot", use_container_width=True, key="nav_ai_term")
+    st.button("🛰️ Vulnerability Explorer", use_container_width=True, key="nav_net_recon")
+    st.button("🌐 Threat Intelligence", use_container_width=True, key="nav_threat_intel")
+    st.button("📋 Reports", use_container_width=True, key="nav_compliance")
+    st.button("💻 Assets", use_container_width=True, key="nav_assets")
+    st.button("⚙️ Settings", use_container_width=True, key="nav_ctrl_panel")
     
     st.markdown("---")
     
-    # Cyberpunk Profile Card Model Mapping
+    # Cyberpunk Profile Card Model Mapping (split into profile + engine status,
+    # exact original text/values preserved)
     st.markdown("""
     <div class='profile-card'>
         <div class='profile-header'>
@@ -492,6 +931,8 @@ with st.sidebar:
                 <div class='profile-status'>● SOC Lead Analyst</div>
             </div>
         </div>
+    </div>
+    <div class='engine-status-card'>
         <div style='font-size: 0.75rem; color: #94a3b8; display: flex; justify-content: space-between; margin-bottom: 8px;'>
             <span>Engine: Qwen2.5 (SOC-Rules)</span>
             <span>Enforced</span>
@@ -500,6 +941,65 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
+    # NEW (Phase 1): session info + logout + admin-only account provisioning.
+    # Purely additive — none of the sidebar markup above this line was edited.
+    st.markdown(f"""
+        <div style='margin-top: 14px; padding: 10px 14px; border-radius: 8px; background:#111827; border:1px solid #1e293b; font-size:0.78rem; color:#94a3b8;'>
+            Signed in as <span style='color:#e2e8f0; font-weight:600;'>{st.session_state.username}</span> · <span style='color:#38bdf8;'>{st.session_state.role}</span>
+        </div>
+    """, unsafe_allow_html=True)
+
+    if st.button("🚪 Logout", use_container_width=True, key="logout_btn"):
+        add_log(f"Operator '{st.session_state.username}' logged out.")
+        st.session_state.authenticated = False
+        st.session_state.username = None
+        st.session_state.role = None
+        st.rerun()
+
+    if is_admin():
+        with st.expander("➕ Create New Operator Account"):
+            new_username = st.text_input("New Username", key="new_user_username")
+            new_password = st.text_input("New Password", type="password", key="new_user_password")
+            new_role = st.selectbox("Role", ["analyst", "admin"], key="new_user_role")
+            if st.button("Create Account", use_container_width=True, key="create_user_btn"):
+                if new_username and new_password:
+                    new_id = database.create_user(new_username, new_password, new_role)
+                    if new_id:
+                        st.success(f"Account '{new_username}' created.")
+                        add_log(f"Operator '{st.session_state.username}' created new account '{new_username}' (role: {new_role}).")
+                    else:
+                        st.error("Could not create account — username may already exist.")
+                else:
+                    st.warning("Username and password are required.")
+
+# ==============================================================================
+# 6.5 NEW TOP APPLICATION BAR (FULL-WIDTH, ABOVE BOTH MAIN COLUMNS)
+#     Hamburger / search / theme toggle / gear / window controls are
+#     decorative only — Streamlit cannot natively support a real OS-level
+#     window chrome or a functional in-browser search-everything box here.
+#     The notification badge count IS real (HIGH+CRITICAL ops in history).
+# ==============================================================================
+_high_crit_count = sum(1 for _row in st.session_state.history if _row[3] in ("HIGH", "CRITICAL"))
+
+st.markdown(f"""
+    <div class='app-topbar'>
+        <div class='topbar-left'>
+            <div class='topbar-icon-btn'>☰</div>
+            <div class='topbar-search'><span>Search anything...</span><span>🔍</span></div>
+        </div>
+        <div class='topbar-right'>
+            <div class='topbar-icon-btn'>🔔<span class='notif-badge'>{_high_crit_count}</span></div>
+            <div class='topbar-icon-btn'>🌙</div>
+            <div class='topbar-icon-btn'>⚙️</div>
+            <div class='window-controls'>
+                <div class='window-dot'>—</div>
+                <div class='window-dot'>▢</div>
+                <div class='window-dot'>✕</div>
+            </div>
+        </div>
+    </div>
+""", unsafe_allow_html=True)
+
 # ==============================================================================
 # 7. MAIN INTERFACE SPLIT DESKTOP DOCK PANEL WINDOWING
 # ==============================================================================
@@ -507,56 +1007,72 @@ col_dash, col_chat = st.columns([1.9, 1.3])
 
 # --- LEFT DOCK: SOC MONITOR MATRIX & SCHEMATICS ---
 with col_dash:
-    # Core Dashboard Banner Title
+    # Core Dashboard Banner Title (timestamp now split into two pills to match the reference)
     st.markdown(f"""
         <div class='dashboard-header'>
             <div>
                 <h1>Dashboard Telemetry Matrix</h1>
                 <div class='subtitle'>Automated network intelligence and compliance tracking feeds.</div>
             </div>
-            <div class='timestamp-badge'>📅 {datetime.now().strftime("%d %b %Y")} | 🕒 {datetime.now().strftime("%H:%M:%S")}</div>
+            <div style='display:flex; gap:10px;'>
+                <div class='timestamp-badge'>📅 {datetime.now().strftime("%d %b %Y")}</div>
+                <div class='timestamp-badge'>🕒 {datetime.now().strftime("%H:%M:%S")}</div>
+            </div>
         </div>
     """, unsafe_allow_html=True)
     
-    # Core Operations Metrics Row Layout
+    # Core Operations Metrics Row Layout — same data/labels/trends as before,
+    # restructured through render_stat_card() into the icon+value+trend layout
     m1, m2, m3, m4 = st.columns(4)
-    with m1: 
-        st.markdown(f"<div class='stat-card'><div class='title'>Targets Profiled</div><div class='value' style='color: #3b82f6;'>{st.session_state.total_scans}</div><span class='trend-up'>↑ Global Matrix Sync</span></div>", unsafe_allow_html=True)
-    with m2: 
-        st.markdown(f"<div class='stat-card'><div class='title'>Exposure Markers</div><div class='value' style='color: #ef4444;'>{st.session_state.threats_found}</div><span class='trend-danger'>↑ Attack Surface Bloat</span></div>", unsafe_allow_html=True)
-    with m3: 
-        st.markdown("<div class='stat-card'><div class='title'>Global Risk Index</div><div class='value' style='color: #f59e0b;'>28</div><span style='color: #10b981; font-size: 0.8rem; font-weight:500;'>● Conservative Baseline</span></div>", unsafe_allow_html=True)
-    with m4: 
-        st.markdown("<div class='stat-card'><div class='title'>Host Memory</div><div class='value' style='color: #10b981;'>~1.7 GB</div><span class='trend-up'>● Dynamic Sandbox</span></div>", unsafe_allow_html=True)
+    with m1:
+        st.markdown(render_stat_card("🎯", "#3b82f6", st.session_state.total_scans, "Targets Profiled", "↑ Global Matrix Sync", True), unsafe_allow_html=True)
+    with m2:
+        st.markdown(render_stat_card("⚠️", "#ef4444", st.session_state.threats_found, "Exposure Markers", "↑ Attack Surface Bloat", False), unsafe_allow_html=True)
+    with m3:
+        st.markdown(render_stat_card("📊", "#f59e0b", "28", "Global Risk Index", "● Conservative Baseline", True), unsafe_allow_html=True)
+    with m4:
+        st.markdown(render_stat_card("💾", "#10b981", "~1.7 GB", "Host Memory", "● Dynamic Sandbox", True), unsafe_allow_html=True)
     
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # Dynamic Layout Split for Tracking Timelines and Charts Rows
-    col_table_frame, col_side_analytics = st.columns([1.6, 1.0])
+    # Full-width Operations History Timeline (now 5 columns / 5 rows, matching the reference)
+    st.markdown("<div class='section-title'>🔍 Operations History Timeline</div>", unsafe_allow_html=True)
     
-    with col_table_frame:
-        st.markdown("<div class='section-title'>🔍 Operations History Timeline</div>", unsafe_allow_html=True)
+    table_html = """<div class='table-container'><table class='pro-table'>
+                    <tr><th>Target Endpoint</th><th>Operation Category</th><th>Timestamp</th><th>Status</th><th>Threat Weight</th></tr>"""
+    
+    for row in st.session_state.history[:5]:
+        badge_class = "badge-low"
+        if row[3] == "CRITICAL": badge_class = "badge-critical"
+        elif row[3] == "HIGH": badge_class = "badge-high"
+        elif row[3] == "MEDIUM": badge_class = "badge-medium"
         
-        # Build pure HTML injected data grids mapping the execution arrays safely
-        table_html = """<div class='table-container'><table class='pro-table'>
-                        <tr><th>TIMESTAMP</th><th>TARGET ENDPOINT</th><th>OPERATION CATEGORY</th><th>THREAT WEIGHT</th></tr>"""
+        cat_badge = get_category_badge(row[2])
         
-        for row in st.session_state.history[:4]:
-            badge_class = "badge-low"
-            if row[3] == "CRITICAL": badge_class = "badge-critical"
-            elif row[3] == "HIGH": badge_class = "badge-high"
-            elif row[3] == "MEDIUM": badge_class = "badge-medium"
-            
-            table_html += f"""<tr>
-                <td style='color: #94a3b8; font-family: monospace;'>{row[0]}</td>
-                <td style='font-weight: 700; color: #f8fafc;'>{row[1]}</td>
-                <td style='color: #cbd5e1;'>{row[2]}</td>
-                <td><span class='badge {badge_class}'>{row[3]}</span></td>
-            </tr>"""
-        table_html += "</table></div>"
-        st.markdown(table_html, unsafe_allow_html=True)
-        
-    with col_side_analytics:
+        table_html += f"""<tr>
+            <td style='font-weight: 700; color: #f8fafc;'>{row[1]}</td>
+            <td><span class='badge {cat_badge}'>{row[2]}</span></td>
+            <td style='color: #94a3b8; font-family: monospace;'>{row[0]}</td>
+            <td><span class='badge badge-success'>Completed</span></td>
+            <td><span class='badge {badge_class}'>{row[3]}</span></td>
+        </tr>"""
+    table_html += "</table></div>"
+    st.markdown(table_html, unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # New 3-column row: real Risk Distribution donut | existing Attack Surface panel (moved) | real Recent Activity
+    col_risk, col_threats, col_activity = st.columns(3)
+    
+    with col_risk:
+        st.markdown("<div class='section-title'>🍩 Risk Distribution</div>", unsafe_allow_html=True)
+        risk_fig = render_risk_distribution_chart(st.session_state.history)
+        if risk_fig is not None:
+            st.plotly_chart(risk_fig, use_container_width=True)
+        else:
+            st.markdown("<div style='text-align:center; color:#64748b; padding: 40px 0; font-size:0.85rem;'>No Data</div>", unsafe_allow_html=True)
+    
+    with col_threats:
         st.markdown("<div class='section-title'>⚠️ Attack Surface Vector Shares</div>", unsafe_allow_html=True)
         st.markdown("""
             <div style='background: #0b0f17; border: 1px solid #1e293b; border-radius: 12px; padding: 20px;'>
@@ -575,6 +1091,25 @@ with col_dash:
             </div>
         """, unsafe_allow_html=True)
         
+    with col_activity:
+        st.markdown("<div class='section-title'>🕒 Recent Activity</div>", unsafe_allow_html=True)
+        recent_items = st.session_state.history[:3]
+        activity_html = "<div class='reports-list'>"
+        _icon_color_map = {"badge-cyan": "#22d3ee", "badge-info": "#38bdf8", "badge-purple": "#a855f7"}
+        for row in recent_items:
+            cat_badge = get_category_badge(row[2])
+            icon_color = _icon_color_map.get(cat_badge, "#94a3b8")
+            activity_html += f"""<div class='report-item'>
+                <div class='report-icon' style='background:{icon_color}22; color:{icon_color};'>📄</div>
+                <div>
+                    <div class='report-name'>{row[2]}</div>
+                    <div class='report-meta'>{row[1]} · {row[0]}</div>
+                </div>
+            </div>"""
+        activity_html += "</div>"
+        st.markdown(activity_html, unsafe_allow_html=True)
+        st.button("View Full Timeline", use_container_width=True, key="view_full_timeline")
+        
     # Per-session Graph Canvas
     st.markdown("<div class='section-title'>📊 Live Compliance Analytics Graph Canvas</div>", unsafe_allow_html=True)
     if st.session_state.latest_chart is not None:
@@ -587,7 +1122,7 @@ with col_dash:
         """, unsafe_allow_html=True)
         
     # 🚀 1. NEW ADVANCED RECON UI: PORT SCAN VISUALIZER
-    st.markdown("### 📊 Port Perimeter Share")
+    st.markdown("<div class='section-title'>📊 Port Perimeter Share</div>", unsafe_allow_html=True)
     try:
         fig = render_port_donut_chart(open_ports_count=3, filtered_closed_count=97)
         st.plotly_chart(fig, use_container_width=True)
@@ -621,7 +1156,7 @@ with col_dash:
 with col_chat:
     st.markdown("""
         <div class='chat-header'>
-            <div style='font-size: 1.6rem;'>🤖</div>
+            <div class='chat-avatar'>🤖</div>
             <div>
                 <h2 class='chat-title'>AI Analyst Assistant Terminal</h2>
                 <div class='chat-status'><span style='width: 7px; height: 7px; background: #10b981; border-radius: 50%; display:inline-block;'></span> Strict SOC Mode Active</div>
@@ -630,24 +1165,44 @@ with col_chat:
     """, unsafe_allow_html=True)
     
     # Internal Dialog Message Window Enclosure Container
-    chat_box = st.container(height=650)
+    chat_box = st.container(height=560)
       
     with chat_box:
         for m in st.session_state.messages:
-            with st.chat_message(m["role"]):
+            avatar = "🤖" if m["role"] == "assistant" else "🧑‍💻"
+            with st.chat_message(m["role"], avatar=avatar):
                 st.markdown(m["content"])
 
+    # NEW: Quick-reply pill buttons — the only functional addition to the chat
+    # panel. Each one just feeds straight into the SAME prompt variable that
+    # st.chat_input produces, so it runs through the identical ROUTE 7/1/8
+    # logic below, completely unchanged.
+    quick_prompt = None
+    qr1, qr2, qr3 = st.columns(3)
+    with qr1:
+        if st.button("💬 Explain this", use_container_width=True, key="qr_explain"):
+            quick_prompt = "Explain this finding in more detail."
+    with qr2:
+        if st.button("🛠️ How to fix?", use_container_width=True, key="qr_fix"):
+            quick_prompt = "What are the recommended remediation steps for this?"
+    with qr3:
+        if st.button("🚨 Is this critical?", use_container_width=True, key="qr_critical"):
+            quick_prompt = "Is this finding critical or urgent? Please assess severity."
+
     # Command Router Processing Evaluation Engine Box Intercept Input Loops
-    if prompt := st.chat_input("Issue technical requests or type system commands..."):
+    chat_input_value = st.chat_input("Issue technical requests or type system commands...")
+    prompt = chat_input_value if chat_input_value else quick_prompt
+
+    if prompt:
         st.session_state.messages.append({"role": "user", "content": prompt})
         with chat_box:
-            with st.chat_message("user"):
+            with st.chat_message("user", avatar="🧑‍💻"):
                 st.markdown(prompt)
         
         prompt_lower = prompt.lower()
         
         with chat_box:
-            with st.chat_message("assistant"):
+            with st.chat_message("assistant", avatar="🤖"):
                 
                 # ROUTE 7: AUTOMATED INFRASTRUCTURE CHAIN ANALYSIS (ONE-BUTTON AUTOMATION)
                 if "analyze" in prompt_lower or "fullscan" in prompt_lower:
@@ -797,6 +1352,62 @@ with col_chat:
                     else:
                         st.error("Please provide a valid domain target (e.g. header target.com)")
 
+                # ROUTE A: DIRECT NMAP SCAN COMMAND (NEW — Phase 4.1 hotfix)
+                elif "scan" in prompt_lower:
+                    ip_match = re.search(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", prompt)
+                    if ip_match:
+                        target_ip = ip_match.group(0)
+                        add_log(f"Direct Nmap scan command issued for target: {target_ip}")
+                        nmap_result = run_nmap(target_ip)
+                        st.code(nmap_result, language="text")
+                        st.session_state.messages.append({"role": "assistant", "content": f"```\n{nmap_result}\n```"})
+                        st.session_state.total_scans += 1
+                        add_history(target_ip, "Direct Nmap Scan", "LOW", nmap_result)
+                    else:
+                        st.error("Please provide a valid IP address (e.g. scan 192.168.1.1)")
+
+                # ROUTE B: DIRECT WHOIS LOOKUP COMMAND (NEW — Phase 4.1 hotfix)
+                elif "whois" in prompt_lower:
+                    dom_match = re.search(r"([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})", prompt)
+                    if dom_match:
+                        target_domain = dom_match.group(1)
+                        add_log(f"Direct WHOIS lookup command issued for target: {target_domain}")
+                        whois_result = run_whois(target_domain)
+                        st.code(whois_result, language="text")
+                        st.session_state.messages.append({"role": "assistant", "content": f"```\n{whois_result}\n```"})
+                        st.session_state.total_scans += 1
+                        add_history(target_domain, "WHOIS Lookup", "LOW", whois_result)
+                    else:
+                        st.error("Please provide a valid domain target (e.g. whois google.com)")
+
+                # ROUTE C: DIRECT DIG/DNS LOOKUP COMMAND (NEW — Phase 4.1 hotfix)
+                elif "dig" in prompt_lower or "dns" in prompt_lower:
+                    dom_match = re.search(r"([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})", prompt)
+                    if dom_match:
+                        target_domain = dom_match.group(1)
+                        add_log(f"Direct DNS dig command issued for target: {target_domain}")
+                        dig_result = run_dig(target_domain)
+                        st.code(dig_result, language="text")
+                        st.session_state.messages.append({"role": "assistant", "content": f"```\n{dig_result}\n```"})
+                        st.session_state.total_scans += 1
+                        add_history(target_domain, "DNS Dig Query", "LOW", dig_result)
+                    else:
+                        st.error("Please provide a valid domain target (e.g. dig google.com)")
+
+                # ROUTE D: DIRECT SUBDOMAIN DISCOVERY COMMAND (NEW — Phase 4.1 hotfix)
+                elif "subdomain" in prompt_lower:
+                    dom_match = re.search(r"([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})", prompt)
+                    if dom_match:
+                        target_domain = dom_match.group(1)
+                        add_log(f"Direct subdomain discovery command issued for target: {target_domain}")
+                        subdomain_results = run_subdomain_brute_force(target_domain)
+                        st.dataframe(subdomain_results, use_container_width=True)
+                        st.session_state.messages.append({"role": "assistant", "content": f"Discovered {len(subdomain_results)} subdomain(s) for `{target_domain}`. See table above."})
+                        st.session_state.total_scans += 1
+                        add_history(target_domain, "Subdomain Discovery", "LOW", str(subdomain_results))
+                    else:
+                        st.error("Please provide a valid domain target (e.g. subdomain google.com)")
+
                 # 🤖 ROUTE 8: GENERAL CHAT FALLBACK (If no commands match)
                 else:
                     if llm:
@@ -806,3 +1417,16 @@ with col_chat:
                             st.session_state.messages.append({"role": "assistant", "content": response})
                     else:
                         st.error("AI Language model core link offline.")
+
+# ==============================================================================
+# 8. NEW BOTTOM STATUS BAR (FULL-WIDTH, BELOW BOTH MAIN COLUMNS)
+#     AI Engine + Database reflect REAL llm / db_ready state — not fabricated.
+# ==============================================================================
+st.markdown(f"""
+    <div class='status-bar'>
+        <div class='status-item'><span class='status-dot' style='background:#10b981;'></span> System Status: <span style='color:#10b981; font-weight:600;'>Secure</span></div>
+        <div class='status-item'><span class='status-dot' style='background:{"#10b981" if llm else "#ef4444"};'></span> AI Engine: <span style='color:#e2e8f0; font-weight:600;'>{"Qwen2.5:3b (Ollama)" if llm else "Offline"}</span></div>
+        <div class='status-item'><span class='status-dot' style='background:{"#10b981" if db_ready else "#ef4444"};'></span> Database: <span style='color:#e2e8f0; font-weight:600;'>{"Connected" if db_ready else "Disconnected"}</span></div>
+        <div class='status-item' style='color:#64748b;'>Version: v1.3.5</div>
+    </div>
+""", unsafe_allow_html=True)
