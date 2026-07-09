@@ -84,7 +84,13 @@ from backend.health_checks import full_health_report  # Phase 6, Part E
 
 try:
     from langchain_ollama import OllamaLLM
-    _llm = OllamaLLM(model="qwen2.5:3b")
+    _llm = OllamaLLM(
+    model="qwen2.5:3b",
+    base_url=os.getenv(
+        "OLLAMA_URL",
+        "http://host.containers.internal:11434"
+    )
+)
 except Exception:
     _llm = None
 

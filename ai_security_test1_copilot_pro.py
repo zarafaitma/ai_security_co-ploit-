@@ -654,7 +654,13 @@ st.markdown("""
 @st.cache_resource
 def load_qwen_engine():
     """Initializes and caches the Ollama Qwen Core Link layer"""
-    return OllamaLLM(model="qwen2.5:3b")
+    return OllamaLLM(
+        model="qwen2.5:3b",
+        base_url=os.getenv(
+            "OLLAMA_URL",
+            "http://host.containers.internal:11434"
+        )
+    )
 
 try:
     llm = load_qwen_engine()
@@ -763,18 +769,47 @@ if not st.session_state.authenticated:
 # 5. INTEGRATED HARDWARE/SUBPROCESS OPERATIONAL UTILITY CONTROLLERS
 # ==============================================================================
 def run_nmap(ip):
-    """Executes basic port mapping directly over local network space"""
+    """Executes basic TCP connect scan (Docker + Streamlit compatible)"""
     try:
-        res = subprocess.run(["nmap", "-F", "-sV", ip], capture_output=True, text=True, timeout=30)
-        return res.stdout if res.stdout else "No responses matched scan footprint thresholds."
-    except Exception as e:
-        return f"Nmap internal pipeline fault execution: {e}"
+        cmd = [
+            "nmap",
+            "-Pn",      # Skip host discovery
+            "-sT",      # TCP Connect Scan (no raw socket required)
+            "-F",       # Fast scan
+            "-sV",      # Service version detection
+            "--host-timeout", "30s",
+            ip
+        ]
 
+        res = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=45
+        )
+
+        if res.returncode != 0:
+            return res.stderr.strip()
+
+        return res.stdout if res.stdout else "No open ports detected."
+
+    except subprocess.TimeoutExpired:
+        return "Nmap scan timed out."
+
+    except Exception as e:
+        return f"Nmap execution error: {e}"
+        
 def run_whois(dom):
     """Gathers registrar records over open network protocol targets"""
     try:
-        res = subprocess.run(["whois", dom], capture_output=True, text=True, timeout=30)
+        res = subprocess.run(
+            ["whois", dom],
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
         return res.stdout[:2500] if res.stdout else "WHOIS standard configuration data empty."
+
     except Exception as e:
         return f"WHOIS internal registration lookup exception: {e}"
 
